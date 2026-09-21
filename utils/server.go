@@ -32,6 +32,10 @@ type CotacaoResponse struct {
 }
 
 func Server() {
+	if err := createTable(); err != nil {
+		log.Fatal(err)
+	}
+
 	mux := http.NewServeMux()
 	mux.HandleFunc("/cotacao", handleRequest)
 
@@ -41,7 +45,10 @@ func Server() {
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 5 * time.Second,
 	}
-	server.ListenAndServe()
+	err := server.ListenAndServe()
+	if err != nil {
+		log.Println(err)
+	}
 }
 
 func handleRequest(w http.ResponseWriter, r *http.Request) {
@@ -84,6 +91,8 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 	stmt, err := db.Prepare("INSERT INTO cotacao (code, codein, name, high, low, varBid, pctChange, bid, ask, timestamp, create_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
 	if err != nil {
 		log.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 	defer stmt.Close()
 
@@ -93,6 +102,7 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 	_, err = stmt.ExecContext(ctxDatabase, cotacaoResponse.USDBRL.Code, cotacaoResponse.USDBRL.Codein, cotacaoResponse.USDBRL.Name, cotacaoResponse.USDBRL.High, cotacaoResponse.USDBRL.Low, cotacaoResponse.USDBRL.VarBid, cotacaoResponse.USDBRL.PctChange, cotacaoResponse.USDBRL.Bid, cotacaoResponse.USDBRL.Ask, cotacaoResponse.USDBRL.Timestamp, cotacaoResponse.USDBRL.CreateDate)
 	if err != nil {
 		log.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -106,6 +116,14 @@ func createConnection() *sql.DB {
 		log.Println(err)
 	}
 	return db
+}
+
+func createTable() error {
+	db := createConnection()
+	defer db.Close()
+
+	_, err := db.Exec("CREATE TABLE IF NOT EXISTS cotacao (code TEXT, codein TEXT, name TEXT, high TEXT, low TEXT, varBid TEXT, pctChange TEXT, bid TEXT, ask TEXT, timestamp TEXT, create_date TEXT)")
+	return err
 }
 
 func handleLog(next http.Handler) http.Handler {

@@ -12,20 +12,6 @@ import (
 	"time"
 )
 
-type Response struct {
-	Code       string `json:"code"`
-	Codein     string `json:"codein"`
-	Name       string `json:"name"`
-	High       string `json:"high"`
-	Low        string `json:"low"`
-	VarBid     string `json:"varBid"`
-	PctChange  string `json:"pctChange"`
-	Bid        string `json:"bid"`
-	Ask        string `json:"ask"`
-	Timestamp  string `json:"timestamp"`
-	CreateDate string `json:"create_date"`
-}
-
 type Data struct {
 	USDBRL Cotacao `json:"USDBRL"`
 }
@@ -67,7 +53,7 @@ func GetCotacao() {
 	}
 	defer file.Close()
 
-	_, err = file.Write([]byte(fmt.Sprintf("Dólar: %s", data.USDBRL.Bid)))
+	_, err = fmt.Fprintf(file, "Dólar: %s", data.USDBRL.Bid)
 	if err != nil {
 		log.Println(err)
 		return
