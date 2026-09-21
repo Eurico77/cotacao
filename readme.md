@@ -112,7 +112,7 @@ O client só mostra o sintoma; a causa costuma estar no log do server. Olhe semp
 | `dial tcp [::1]:8080: connect: connection refused` | — | O server não está rodando. | Suba o server (passo 1). Se ele encerrar logo após iniciar, veja "Server encerra ao iniciar" abaixo. |
 | `context deadline exceeded` | pode não logar nada | O client desistiu após 300ms sem resposta do server. | Execute o client de novo. |
 | `invalid character 'G' looking for beginning of value` | `Get "https://economia.awesomeapi.com.br/json/last/USD-BRL": context deadline exceeded` | A AwesomeAPI não respondeu em 200ms. O server devolve `500` com o erro em texto puro, e o client falha ao interpretá-lo como JSON. | Execute o client de novo e confira o acesso à internet. |
-| `unexpected end of JSON input` | `context deadline exceeded` (sozinho, sem URL) | A gravação no SQLite passou de 10ms. O server responde `200` com corpo vazio, e a cotação **não** é salva. | Execute o client de novo. |
+| `invalid character 'c' looking for beginning of value` | `context deadline exceeded` (sozinho, sem URL) | A gravação no SQLite passou de 10ms. O server devolve `500` com o erro em texto puro, e a cotação **não** é salva. | Execute o client de novo. |
 
 ### Server encerra ao iniciar
 
